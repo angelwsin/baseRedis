@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans	http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
+	http://www.springframework.org/schema/task
+	http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+
+	<!-- 开启spring注解扫描 -->
+	<context:annotation-config />
+	<!-- 开启Spring定时器注解 -->
+	<task:annotation-driven />
+	<context:component-scan base-package="com.p2p" />
+    <bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory" 
+             p:host-name="192.168.109.130" p:port="7001" />
+             
+              <!-- redis template definition -->
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate" 
+     p:connection-factory-ref="connectionFactory"/>
+     <bean id="connectionWinFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory" 
+             p:host-name="192.168.109.130" p:port="7001" />
+             
+              <!-- redis template definition -->
+    <bean id="redisWinTemplate" class="org.springframework.data.redis.core.RedisTemplate" 
+     p:connection-factory-ref="connectionWinFactory"/>
+     
+	<bean id="dataSourceMaster" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+		<property name="dataSourceClassName" value="com.mysql.jdbc.jdbc2.optional.MysqlDataSource" />
+		<property name="dataSourceProperties">
+			<props>
+				<prop key="url">jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=UTF-8</prop>
+				<prop key="user">root</prop>
+				<prop key="password">mysqladmin</prop>
+				<prop key="cachePrepStmts">true</prop>
+				<prop key="prepStmtCacheSize">250</prop>
+				<prop key="prepStmtCacheSqlLimit">2048</prop>
+				<!-- <prop key="useServerPrepStmts">true</prop> -->
+			</props>
+		</property>
+	</bean>
+	
+	
+	<bean id="dataSourceSlave" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+		<property name="dataSourceClassName" value="com.mysql.jdbc.jdbc2.optional.MysqlDataSource" />
+		<property name="dataSourceProperties">
+			<props>
+				<prop key="url">jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=UTF-8</prop>
+				<prop key="user">root</prop>
+				<prop key="password">mysqladmin</prop>
+				<prop key="cachePrepStmts">true</prop>
+				<prop key="prepStmtCacheSize">250</prop>
+				<prop key="prepStmtCacheSqlLimit">2048</prop>
+				<!-- <prop key="useServerPrepStmts">true</prop> -->
+			</props>
+		</property>
+	</bean>
+	
+	
+	<bean id="dynamicDataSource" class="com.p2p.DynamicDataSource">  
+        <property name="targetDataSources">  
+            <map key-type="java.lang.String">  
+                <entry value-ref="dataSourceMaster" key="dataSourceMaster"></entry>  
+                <entry value-ref="dataSourceSlave" key="dataSourceSlave"></entry>  
+            </map>  
+        </property>  
+        <property name="defaultTargetDataSource" ref="dataSourceSlave"> 
+        </property>  
+    </bean>  
+	
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dynamicDataSource" />
+		<property name="mappingDirectoryLocations">
+			<list>
+				<value>classpath*:com/p2p/bean/*</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<!-- <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop> -->
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.default_batch_fetch_size">10</prop>
+				 <prop key="hibernate.hbm2ddl.auto">update</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="txManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<tx:annotation-driven transaction-manager="txManager" />
+
+	<aop:config>
+		<aop:pointcut expression="execution (public * com.p2p.service..*.*(..))" id="mycut" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="mycut" />
+	</aop:config>
+	
+
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="do*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="*" isolation="REPEATABLE_READ" />
+		</tx:attributes>
+	</tx:advice>
+
+	<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="3" />
+		<property name="maxPoolSize" value="10" />
+		<property name="queueCapacity" value="100" />
+		<property name="keepAliveSeconds" value="300" />
+		<property name="rejectedExecutionHandler">
+			<bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy" />
+		</property>
+	</bean> 
+	
+	
+</beans>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.p2p.bean.user.User" table="user">
+		<id name="id" type="integer" unsaved-value="0">
+			<column name="id" />
+			<generator class="identity" />
+		</id>
+		
+		<property name="username" type="string">
+			<column name="username" length="20" not-null="true">
+				<comment>用户名</comment>
+			</column>
+		</property>
+		<property name="password" type="string">
+			<column name="password" length="40" not-null="true">
+				<comment>登录密码</comment>
+			</column>
+		</property>
+		
+	</class>
+
+</hibernate-mapping>
