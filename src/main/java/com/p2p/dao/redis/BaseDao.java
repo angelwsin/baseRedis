@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
@@ -249,7 +250,6 @@ public class BaseDao<T> {
 	
 	public void  saveList(final String key,final byte[] ...b){
 		  redisTemplate.execute(new RedisCallback<T>() {
-
 			public T doInRedis(RedisConnection connection) throws DataAccessException {
 				// TODO Auto-generated method stub
 				 connection.lPush(redisSerializer.serialize(key), b);

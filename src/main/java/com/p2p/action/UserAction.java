@@ -3,13 +3,13 @@ package com.p2p.action;
 import java.io.IOException;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.p2p.bean.user.User;
 import com.p2p.service.UserService;
@@ -50,6 +50,24 @@ public class UserAction   extends DefaultAction{
 				e.printStackTrace();
 			}
 	    	 
+	     }
+	     
+	     @RequestMapping(value="/index")
+	     public String index(){
+	    	 return "user/user_login";
+	     }
+	     
+	     @RequestMapping(value="/login",method=RequestMethod.POST)
+	     public void login(User user,HttpServletRequest request,HttpServletResponse response){
+	    	   request.getSession().setAttribute("user", user);
+	    	  
+	    		   try {
+					response.sendRedirect(request.getContextPath()+"/im/view");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			
 	     }
 		
 		
