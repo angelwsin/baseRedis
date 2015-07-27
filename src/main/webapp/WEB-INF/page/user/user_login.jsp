@@ -6,8 +6,8 @@
 </head>
 <body>
       <form action="/fenbushi/user/login" method="post">
-           姓名:<input name="user.username" type="text"><br>
-          密码：<input name="user.password" type="password"><br>
+           姓名:<input name="username" type="text"><br>
+          密码：<input name="password" type="password"><br>
           <input type="submit" value="添加">
       
       </form>

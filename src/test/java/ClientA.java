@@ -34,18 +34,23 @@ public class ClientA {
 //					}.start();
 				Message message = new Message();
 				message.setId(0);
-				message.setFrom("");
+				message.setFrom("angelwsin");
 				message.setTo("");
 				message.setContent("1regist");
 				message.setType("regist");
 				   writer.write(JSONObject.toJSONString(message)+"\n");
 				   writer.flush();
-				  
+				       try {
+						Thread.sleep(10000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				        
 							Message msg = new Message();
 							msg.setId(0);
-							msg.setFrom("");
-							msg.setTo("");
+							msg.setFrom("angelwsin");
+							msg.setTo("wsin");
 							msg.setContent("msg");	
 							msg.setType("msg");
 							
