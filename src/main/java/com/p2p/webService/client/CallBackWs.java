@@ -10,6 +10,7 @@ import org.apache.axis2.rpc.client.RPCServiceClient;
 
 public class CallBackWs {
 	
+	@SuppressWarnings("rawtypes")
 	public static void main(String[] args) {
 		//使用RPC方式调用WebService 
 		  RPCServiceClient serviceClient = null;
